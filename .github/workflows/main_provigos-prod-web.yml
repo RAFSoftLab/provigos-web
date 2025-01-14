@@ -43,3 +43,6 @@ jobs:
         with:
           name: build
           path: build/
+
+      - name: Start server
+        run: sudo npm run start &
