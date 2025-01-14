@@ -2,7 +2,7 @@ import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { TextField, Button, Typography, Box, Container } from "@mui/material";
 // import "./Login.css";
-import { REACT_APP_API_ORIGIN } from "../Config";
+import { REACT_APP_API_ORIGIN } from "../common/Config";
 import axios from "axios";
 import { useUser } from "../components/UserContext";
 

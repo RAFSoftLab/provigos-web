@@ -2,7 +2,7 @@ import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { TextField, Button, Typography, Box, Container } from "@mui/material";
 import axios from "axios";
-import { REACT_APP_API_ORIGIN } from "../Config";
+import { REACT_APP_API_ORIGIN } from "../common/Config";
 import { useUser } from "../components/UserContext";
 // import "./Register.css";
 
@@ -26,7 +26,7 @@ const SignupPage: React.FC = () => {
     });
   };
 
-  const { token, setToken, clearToken } = useUser();
+  // const { token, setToken, clearToken } = useUser();
 
   return (
     <Container maxWidth="sm" className="signup-container">
@@ -71,7 +71,6 @@ const SignupPage: React.FC = () => {
             error={!!errors.email}
             helperText={errors.email?.message}
           />
-          {token}
           <TextField
             label="Password"
             variant="outlined"

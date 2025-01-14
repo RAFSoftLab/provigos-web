@@ -1,28 +1,22 @@
-import { Button } from "@mui/material";
 import "./App.css";
-import { useNavigate } from "react-router-dom";
-import DashboardPage from "./pages/Dashboard";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Sidebar from "./components/Sidebar";
+import LoginPage from "./pages/Login";
+import SignupPage from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
-  const navigate = useNavigate();
-
   return (
     <div className="App">
-      <DashboardPage />
-      <Button
-        onClick={() => {
-          navigate("/login");
-        }}
-      >
-        Login
-      </Button>
-      <Button
-        onClick={() => {
-          navigate("/register");
-        }}
-      >
-        Register
-      </Button>
+      <Router>
+        
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<SignupPage />} />
+          <Route path="*" element={<Dashboard />} />
+        </Routes>
+      </Router>
       {/* </header> */}
     </div>
   );

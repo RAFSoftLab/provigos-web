@@ -1,23 +1,12 @@
 import React from "react";
-import {
-  Box,
-  CssBaseline,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Typography,
-} from "@mui/material";
+import { Box, CssBaseline, Typography } from "@mui/material";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import "./Dashboard.css";
 import { useNavigate } from "react-router-dom";
-
-const drawerWidth = 240;
+import Sidebar from "../components/Sidebar";
 
 const DashboardPage: React.FC = () => {
-  const navigate = useNavigate();
   // Steps data
   const stepsChartOptions: ApexOptions = {
     chart: {
@@ -102,42 +91,12 @@ const DashboardPage: React.FC = () => {
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
       {/* Sidebar */}
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: "border-box",
-          },
-        }}
-      >
-        <List>
-          <ListItemButton>
-            <ListItemText primary="Dashboard" />
-          </ListItemButton>
-          <ListItemButton
-            onClick={() => {
-              navigate("/login");
-            }}
-          >
-            <ListItemText primary="Login" />
-          </ListItemButton>
-          <ListItemButton
-            onClick={() => {
-              navigate("/login");
-            }}
-          >
-            <ListItemText primary="Register" />
-          </ListItemButton>
-        </List>
-      </Drawer>
 
+      <Sidebar />
       {/* Main Content */}
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          Health Metrics Dashboard
+          PROVIGOS Health Metrics Dashboard
         </Typography>
 
         {/* Grid container for charts */}
