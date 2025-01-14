@@ -1,44 +1,45 @@
-name: Deploy React site to droplet
+name: Build and Test React App
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
-  build:
+  build-test:
+    name: Build and Test React App
     runs-on: self-hosted
+
     steps:
-      - name: Checkout
+      # Checkout the repository code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node
+      # Set up Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
-          cache: npm
+          node-version: "18"
+          cache: "npm"
 
-      - name: Debug Port 3000 Usage
-        run: |
-          PORT_IN_USE=$(lsof -i tcp:3000 -t)
-          if [ -z "$PORT_IN_USE" ]; then
-              echo "No process is using port 3000"
-          else
-              echo "Process using port 3000: $PORT_IN_USE"
-              echo "Killing process $PORT_IN_USE"
-              kill -9 "$PORT_IN_USE"
-              echo "Process killed"
-          fi
-
-      # Delete package-lock.json and node_modules
-      - name: Clean Up
-        run: |
-          rm -rf package-lock.json node_modules
-
+      # Install dependencies
       - name: Install dependencies
-        run: npm install --force
-      - name: Build Project
+        run: npm install
+
+      # Run tests
+      - name: Run tests
+        run: npm test -- --watchAll=false
+
+      # Build the React app
+      - name: Build React App
         run: npm run build
-      - name: Start server
-        run: sudo npm run start &
+
+      # Upload build artifacts (optional)
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: build/
