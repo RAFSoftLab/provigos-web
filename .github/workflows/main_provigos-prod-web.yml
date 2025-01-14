@@ -2,9 +2,9 @@ name: Deploy React site to droplet
 
 on:
   push:
-    branches: main // replace branch_name with your branch
+    branches: [main]
   pull_request:
-    branches: main
+    branches: [main]
 
 jobs:
   build:
