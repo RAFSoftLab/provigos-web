@@ -1,12 +1,84 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Box, CssBaseline, Typography } from "@mui/material";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import "./Dashboard.css";
-import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import { useUser } from "../components/UserContext";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { REACT_APP_API_ORIGIN } from "../common/Config";
 
 const DashboardPage: React.FC = () => {
+
+  const { token, setToken, clearToken } = useUser();
+  const [currentUser, setCurrentUser] = useState("");
+  const [stepsChartData, setStepsChartData] = useState([]);
+  const [stepsChartDates, setStepsChartDates] = useState([]);
+  const [weightChartData, setWeightChartData] = useState([]);
+  const [weightChartDates, setWeightChartDates] = useState([]);
+  const [leanBodyMassChartData, setLeanBodyMassChartData] = useState([]);
+  const [leanBodyMassChartDates, setLeanBodyMassChartDates] = useState([]);
+  const [heartRateChartData, setHeartRateChartData] = useState([]);
+  const [heartRateChartDates, setHeartRateChartDates] = useState([]);
+  const [caloriesBurnedRateChartData, setCaloriesBurnedRateChartData] = useState([]);
+  const [caloriesBurnedRateChartDates, setCaloriesBurnedRateChartDates] = useState([]);
+
+
+  useEffect(() => {
+    if(token) {
+      const decoded = jwtDecode(token) as any;
+      console.log(decoded);
+      setCurrentUser(decoded["username"]);
+
+      axios
+      .get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {headers: { "Authorization": token}})
+      .then(
+        (response) => {
+          //TODO Add loading spinner
+          console.log(response.data)
+          const values = response.data;
+
+
+          //@ts-ignore
+          setStepsChartData([{name: "Steps", data:Object.values(values.steps)}]);
+          //@ts-ignore
+          setStepsChartDates(Object.keys(values.steps));
+
+          //@ts-ignore
+          setWeightChartData([{name: "Weight (kg)", data:Object.values(values.weight)}]);
+          //@ts-ignore
+          setWeightChartDates(Object.keys(values.weight));
+
+          //@ts-ignore
+          setLeanBodyMassChartData([{name: "Lean Body Mass (kg)", data:Object.values(values.leanBodyMass
+          )}]);
+          //@ts-ignore
+          setLeanBodyMassChartDates(Object.keys(values.leanBodyMass
+          ));
+
+          //@ts-ignore
+          setHeartRateChartData([{name: "Heart Rate (BPM)", data:Object.values(values.heartRate
+          )}]);
+          //@ts-ignore
+          setHeartRateChartDates(Object.keys(values.heartRate
+          ));
+
+          //@ts-ignore
+          setCaloriesBurnedRateChartData([{name: "Calories Burned", data:Object.values(values.caloriesBurned
+          )}]);
+          //@ts-ignore
+          setCaloriesBurnedRateChartDates(Object.keys(values.caloriesBurned
+          ));
+        },
+        (reason) => {
+          console.log(reason);
+        }
+      );
+    }
+  },[token])
+
+
   // Steps data
   const stepsChartOptions: ApexOptions = {
     chart: {
@@ -14,7 +86,7 @@ const DashboardPage: React.FC = () => {
       height: 350,
     },
     xaxis: {
-      categories: ["2025-01-08", "2025-01-09", "2025-01-10", "2025-01-11"],
+      categories: stepsChartDates,
     },
     stroke: {
       curve: "smooth",
@@ -24,68 +96,45 @@ const DashboardPage: React.FC = () => {
     },
   };
 
-  const stepsChartData = [
-    {
-      name: "Steps",
-      data: [10000, 12000, 8000, 14000],
-    },
-  ];
-
   // Weight data
   const weightChartOptions: ApexOptions = {
     chart: { type: "line", height: 350 },
     xaxis: {
-      categories: ["2025-01-08", "2025-01-09", "2025-01-10", "2025-01-11"],
+      categories: weightChartDates,
     },
     stroke: { curve: "smooth" },
     title: { text: "Weight Over Time" },
   };
 
-  const weightChartData = [
-    { name: "Weight (kg)", data: [70, 69.8, 70.1, 69.7] },
-  ];
-
   // Lean Body Mass data
   const leanBodyMassChartOptions: ApexOptions = {
     chart: { type: "line", height: 350 },
     xaxis: {
-      categories: ["2025-01-08", "2025-01-09", "2025-01-10", "2025-01-11"],
+      categories: leanBodyMassChartDates,
     },
     stroke: { curve: "smooth" },
     title: { text: "Lean Body Mass Over Time" },
   };
 
-  const leanBodyMassChartData = [
-    { name: "Lean Body Mass (kg)", data: [62, 61.9, 62.1, 61.8] },
-  ];
-
   // Calories Burned data
   const caloriesChartOptions: ApexOptions = {
     chart: { type: "line", height: 350 },
     xaxis: {
-      categories: ["2025-01-08", "2025-01-09", "2025-01-10", "2025-01-11"],
+      categories: caloriesBurnedRateChartDates,
     },
     stroke: { curve: "smooth" },
     title: { text: "Calories Burned Over Time" },
   };
 
-  const caloriesChartData = [
-    { name: "Calories Burned", data: [2500, 2700, 2600, 2800] },
-  ];
-
   // Heart Rate data
   const heartRateChartOptions: ApexOptions = {
     chart: { type: "line", height: 350 },
     xaxis: {
-      categories: ["2025-01-08", "2025-01-09", "2025-01-10", "2025-01-11"],
+      categories: heartRateChartDates,
     },
     stroke: { curve: "smooth" },
     title: { text: "Heart Rate Over Time" },
   };
-
-  const heartRateChartData = [
-    { name: "Heart Rate (BPM)", data: [70, 72, 71, 73] },
-  ];
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -98,6 +147,7 @@ const DashboardPage: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           PROVIGOS Health Metrics Dashboard
         </Typography>
+        Current User: {currentUser !== "" ? currentUser : "Not logged in"}
 
         {/* Grid container for charts */}
         <div className="dashboard-container">
@@ -128,7 +178,7 @@ const DashboardPage: React.FC = () => {
           <div className="chart-container">
             <ReactApexChart
               options={caloriesChartOptions}
-              series={caloriesChartData}
+              series={caloriesBurnedRateChartData}
               type="line"
               height={350}
             />

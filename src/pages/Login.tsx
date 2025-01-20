@@ -5,6 +5,7 @@ import { TextField, Button, Typography, Box, Container } from "@mui/material";
 import { REACT_APP_API_ORIGIN } from "../common/Config";
 import axios from "axios";
 import { useUser } from "../components/UserContext";
+import { useNavigate } from "react-router-dom";
 
 interface LoginFormInputs {
   email: string;
@@ -19,6 +20,7 @@ const LoginPage: React.FC = () => {
   } = useForm<LoginFormInputs>();
 
   const { token, setToken, clearToken } = useUser();
+  const navigate = useNavigate();
   const onSubmit: SubmitHandler<LoginFormInputs> = (data) => {
     axios
       .post(REACT_APP_API_ORIGIN + "/login", {
@@ -27,11 +29,12 @@ const LoginPage: React.FC = () => {
       })
       .then(
         (response) => {
-          console.log(response);
+          //TODO Add loading spinner
           const token = response.data;
           if (token) {
             setToken(token);
           }
+          navigate("/");
         },
         (reason) => {
           console.log(reason);
@@ -89,7 +92,6 @@ const LoginPage: React.FC = () => {
             error={!!errors.password}
             helperText={errors.password?.message}
           />
-          {token}
           <Button
             type="submit"
             fullWidth
