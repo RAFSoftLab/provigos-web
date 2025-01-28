@@ -5,6 +5,7 @@ import { TextField, Button, Typography, Box, Container } from "@mui/material";
 import { REACT_APP_API_ORIGIN } from "../common/Config";
 import axios from "axios";
 import { useUser } from "../components/UserContext";
+import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 
 interface LoginFormInputs {
@@ -40,6 +41,19 @@ const LoginPage: React.FC = () => {
           console.log(reason);
         }
       );
+  };
+
+  const handleLoginSuccess = (credentialResponse: any) => {
+    //console.log("Login Successful!", credentialResponse);
+    const token = credentialResponse.credential;
+    if (token) {
+      setToken(token);
+    }
+    navigate("/");
+  };
+
+  const handleLoginFailure = () => {
+    console.error("Login Failed!");
   };
 
   return (
@@ -101,6 +115,11 @@ const LoginPage: React.FC = () => {
           >
             Log In
           </Button>
+
+          <GoogleLogin
+            onSuccess={handleLoginSuccess}
+            onError={handleLoginFailure}
+          />
         </Box>
       </Box>
     </Container>

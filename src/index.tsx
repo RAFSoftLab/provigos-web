@@ -6,6 +6,8 @@ import reportWebVitals from "./reportWebVitals";
 import { AppProvider } from "@toolpad/core";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import { UserProvider } from "./components/UserContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { REACT_APP_GOOGLE_CLIENT_ID } from "./common/Config";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -20,12 +22,14 @@ const darkTheme = createTheme({
 root.render(
   <React.StrictMode>
     <AppProvider>
-      <ThemeProvider theme={darkTheme}>
-        <CssBaseline />
-        <UserProvider>
-          <App />
-        </UserProvider>
-      </ThemeProvider>
+      <GoogleOAuthProvider clientId={REACT_APP_GOOGLE_CLIENT_ID}>
+        <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <UserProvider>
+            <App />
+          </UserProvider>
+        </ThemeProvider>
+      </GoogleOAuthProvider>
     </AppProvider>
   </React.StrictMode>
 );

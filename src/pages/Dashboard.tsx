@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React, { useEffect, useState } from "react";
 import { Box, CssBaseline, Typography } from "@mui/material";
 import ReactApexChart from "react-apexcharts";
@@ -10,7 +11,6 @@ import axios from "axios";
 import { REACT_APP_API_ORIGIN } from "../common/Config";
 
 const DashboardPage: React.FC = () => {
-
   const { token, setToken, clearToken } = useUser();
   const [currentUser, setCurrentUser] = useState("");
   const [stepsChartData, setStepsChartData] = useState([]);
@@ -21,63 +21,76 @@ const DashboardPage: React.FC = () => {
   const [leanBodyMassChartDates, setLeanBodyMassChartDates] = useState([]);
   const [heartRateChartData, setHeartRateChartData] = useState([]);
   const [heartRateChartDates, setHeartRateChartDates] = useState([]);
-  const [caloriesBurnedRateChartData, setCaloriesBurnedRateChartData] = useState([]);
-  const [caloriesBurnedRateChartDates, setCaloriesBurnedRateChartDates] = useState([]);
-
+  const [caloriesBurnedRateChartData, setCaloriesBurnedRateChartData] =
+    useState([]);
+  const [caloriesBurnedRateChartDates, setCaloriesBurnedRateChartDates] =
+    useState([]);
 
   useEffect(() => {
-    if(token) {
+    if (token) {
       const decoded = jwtDecode(token) as any;
-      console.log(decoded);
-      setCurrentUser(decoded["username"]);
+      setCurrentUser(decoded["name"]);
 
       axios
-      .get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {headers: { "Authorization": token}})
-      .then(
-        (response) => {
-          //TODO Add loading spinner
-          console.log(response.data)
-          const values = response.data;
+        .get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {
+          headers: { Authorization: token },
+        })
+        .then(
+          (response) => {
+            //TODO Add loading spinner
+            console.log(response.data);
+            const values = response.data;
 
+            //@ts-ignore
+            setStepsChartData([
+              { name: "Steps", data: Object.values(values.steps) },
+            ]);
+            //@ts-ignore
+            setStepsChartDates(Object.keys(values.steps));
 
-          //@ts-ignore
-          setStepsChartData([{name: "Steps", data:Object.values(values.steps)}]);
-          //@ts-ignore
-          setStepsChartDates(Object.keys(values.steps));
+            //@ts-ignore
+            setWeightChartData([
+              { name: "Weight (kg)", data: Object.values(values.weight) },
+            ]);
+            //@ts-ignore
+            setWeightChartDates(Object.keys(values.weight));
 
-          //@ts-ignore
-          setWeightChartData([{name: "Weight (kg)", data:Object.values(values.weight)}]);
-          //@ts-ignore
-          setWeightChartDates(Object.keys(values.weight));
+            //@ts-ignore
+            setLeanBodyMassChartData([
+              {
+                name: "Lean Body Mass (kg)",
+                data: Object.values(values.leanBodyMass),
+              },
+            ]);
+            //@ts-ignore
+            setLeanBodyMassChartDates(Object.keys(values.leanBodyMass));
 
-          //@ts-ignore
-          setLeanBodyMassChartData([{name: "Lean Body Mass (kg)", data:Object.values(values.leanBodyMass
-          )}]);
-          //@ts-ignore
-          setLeanBodyMassChartDates(Object.keys(values.leanBodyMass
-          ));
+            //@ts-ignore
+            setHeartRateChartData([
+              {
+                name: "Heart Rate (BPM)",
+                data: Object.values(values.heartRate),
+              },
+            ]);
+            //@ts-ignore
+            setHeartRateChartDates(Object.keys(values.heartRate));
 
-          //@ts-ignore
-          setHeartRateChartData([{name: "Heart Rate (BPM)", data:Object.values(values.heartRate
-          )}]);
-          //@ts-ignore
-          setHeartRateChartDates(Object.keys(values.heartRate
-          ));
-
-          //@ts-ignore
-          setCaloriesBurnedRateChartData([{name: "Calories Burned", data:Object.values(values.caloriesBurned
-          )}]);
-          //@ts-ignore
-          setCaloriesBurnedRateChartDates(Object.keys(values.caloriesBurned
-          ));
-        },
-        (reason) => {
-          console.log(reason);
-        }
-      );
+            //@ts-ignore
+            setCaloriesBurnedRateChartData([
+              {
+                name: "Calories Burned",
+                data: Object.values(values.caloriesBurned),
+              },
+            ]);
+            //@ts-ignore
+            setCaloriesBurnedRateChartDates(Object.keys(values.caloriesBurned));
+          },
+          (reason) => {
+            console.log(reason);
+          }
+        );
     }
-  },[token])
-
+  }, [token]);
 
   // Steps data
   const stepsChartOptions: ApexOptions = {
@@ -148,7 +161,6 @@ const DashboardPage: React.FC = () => {
           PROVIGOS Health Metrics Dashboard
         </Typography>
         Current User: {currentUser !== "" ? currentUser : "Not logged in"}
-
         {/* Grid container for charts */}
         <div className="dashboard-container">
           <div className="chart-container">
