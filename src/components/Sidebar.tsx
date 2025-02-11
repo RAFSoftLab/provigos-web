@@ -20,13 +20,21 @@ const Sidebar: React.FC = () => {
       }}
     >
       <List>
-        <ListItemButton
+      <ListItemButton
           onClick={() => {
-            navigate("/");
+            navigate("/data");
           }}
         >
-          <ListItemText primary="Dashboard" />
+          <ListItemText primary="Data Dashboard" />
         </ListItemButton>
+        <ListItemButton
+          onClick={() => {
+            navigate("/chart");
+          }}
+        >
+          <ListItemText primary="Chart Dashboard" />
+        </ListItemButton>
+
         <ListItemButton
           onClick={() => {
             navigate("/login");

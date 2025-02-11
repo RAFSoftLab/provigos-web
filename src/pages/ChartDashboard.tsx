@@ -3,14 +3,14 @@ import React, { useEffect, useState } from "react";
 import { Box, CssBaseline, Typography } from "@mui/material";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
-import "./Dashboard.css";
+import "./ChartDashboard.css";
 import Sidebar from "../components/Sidebar";
 import { useUser } from "../components/UserContext";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { REACT_APP_API_ORIGIN } from "../common/Config";
 
-const DashboardPage: React.FC = () => {
+const ChartDashboardPage: React.FC = () => {
   const { token, setToken, clearToken } = useUser();
   const [currentUser, setCurrentUser] = useState("");
   const [stepsChartData, setStepsChartData] = useState([]);
@@ -31,8 +31,10 @@ const DashboardPage: React.FC = () => {
       const decoded = jwtDecode(token) as any;
       setCurrentUser(decoded["name"]);
 
+      console.log(REACT_APP_API_ORIGIN);
+
       axios
-        .get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {
+        .get(`${REACT_APP_API_ORIGIN}/healthConnectIntegration`, {
           headers: { Authorization: token },
         })
         .then(
@@ -209,4 +211,4 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage;
+export default ChartDashboardPage;

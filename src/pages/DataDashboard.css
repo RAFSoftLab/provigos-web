@@ -1,0 +1,13 @@
+.dashboard-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 16px; /* Add spacing between grid items */
+  padding: 16px; /* Add padding around the grid */
+}
+
+.chart-container {
+  background-color: #ffffff; /* Optional: Add a white background for charts */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  padding: 16px; /* Add padding inside each chart container */
+}
