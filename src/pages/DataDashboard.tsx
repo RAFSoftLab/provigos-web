@@ -32,6 +32,10 @@ const DataDashboardPage: React.FC = () => {
             leanBodyMass: values.leanBodyMass[date] || 0,
             heartRate: values.heartRate[date] || 0,
             caloriesBurned: values.caloriesBurned[date] || 0,
+            bloodPressure: values.bloodPressure[date] || 0,
+            bodyTemperature: values.bodyTemperature[date] || 0,
+            bodyFat: values.bodyFat[date] || 0,
+            height: values.height[date] || 0,
           }));
           //@ts-ignore
           setRows(formattedRows);
@@ -47,6 +51,10 @@ const DataDashboardPage: React.FC = () => {
     { field: "leanBodyMass", headerName: "Lean Body Mass (kg)", width: 180 },
     { field: "heartRate", headerName: "Heart Rate (BPM)", width: 180 },
     { field: "caloriesBurned", headerName: "Calories Burned", width: 180 },
+    { field: "bloodPressure", headerName: "Blood Pressure", width: 180 },
+    { field: "bodyTemperature", headerName: "Body Temperature", width: 180 },
+    { field: "bodyFat", headerName: "Body Fat", width: 180 },
+    { field: "height", headerName: "Height", width: 180 }
   ];
 
   return (
