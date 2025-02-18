@@ -8,4 +8,7 @@ export const healthConnectKeys = {
     bodyTemperature: "bodyTemperature",
     bodyFat: "bodyFat",
     height: "height",
+    respiratoryRate: "respiratoryRate",
+    bloodGlucose: "bloodGlucose",
+    oxygenSaturation: "oxygenSaturation"
 }

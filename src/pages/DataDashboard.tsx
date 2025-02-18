@@ -36,6 +36,9 @@ const DataDashboardPage: React.FC = () => {
             bodyTemperature: values.bodyTemperature[date] || 0,
             bodyFat: values.bodyFat[date] || 0,
             height: values.height[date] || 0,
+            respiratoryRate: values.respiratoryRate[date] || 0,
+            bloodGlucose: values.bloodGlucose[date] || 0,
+            oxygenSaturation: values.oxygenSaturation[date] || 0,
           }));
           //@ts-ignore
           setRows(formattedRows);
