@@ -37,6 +37,7 @@ const LoginPage: React.FC = () => {
           }
           navigate("/");
         },
+        //
         (reason) => {
           console.log(reason);
         }

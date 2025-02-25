@@ -22,24 +22,41 @@ const DataDashboardPage: React.FC = () => {
           headers: { Authorization: token },
         })
         .then((response) => {
+          // const values = response.data;
+          // const dates = Object.keys(values.steps);
+          // const formattedRows = dates.map((date, index) => ({
+          //   id: index,
+          //   date,
+          //   steps: values.steps[date] || 0,
+          //   weight: values.weight[date] || 0,
+          //   leanBodyMass: values.leanBodyMass[date] || 0,
+          //   heartRate: values.heartRate[date] || 0,
+          //   caloriesBurned: values.caloriesBurned[date] || 0,
+          //   bloodPressure: values.bloodPressure[date] || 0,
+          //   bodyTemperature: values.bodyTemperature[date] || 0,
+          //   bodyFat: values.bodyFat[date] || 0,
+          //   height: values.height[date] || 0,
+          //   respiratoryRate: values.respiratoryRate[date] || 0,
+          //   bloodGlucose: values.bloodGlucose[date] || 0,
+          //   oxygenSaturation: values.oxygenSaturation[date] || 0,
+          // }));
+
           const values = response.data;
           const dates = Object.keys(values.steps);
-          const formattedRows = dates.map((date, index) => ({
-            id: index,
-            date,
-            steps: values.steps[date] || 0,
-            weight: values.weight[date] || 0,
-            leanBodyMass: values.leanBodyMass[date] || 0,
-            heartRate: values.heartRate[date] || 0,
-            caloriesBurned: values.caloriesBurned[date] || 0,
-            bloodPressure: values.bloodPressure[date] || 0,
-            bodyTemperature: values.bodyTemperature[date] || 0,
-            bodyFat: values.bodyFat[date] || 0,
-            height: values.height[date] || 0,
-            respiratoryRate: values.respiratoryRate[date] || 0,
-            bloodGlucose: values.bloodGlucose[date] || 0,
-            oxygenSaturation: values.oxygenSaturation[date] || 0,
-          }));
+
+          const formattedRows = dates.map((date, index) => {
+            const row = { id: index, date };
+
+            // Loop through each key in the values object to only include existing data
+            Object.keys(values).forEach((key) => {
+              if (values[key][date] !== undefined) {
+                //@ts-ignore
+                row[key] = values[key][date];
+              }
+            });
+
+            return row;
+          });
           //@ts-ignore
           setRows(formattedRows);
         })
@@ -57,7 +74,10 @@ const DataDashboardPage: React.FC = () => {
     { field: "bloodPressure", headerName: "Blood Pressure", width: 180 },
     { field: "bodyTemperature", headerName: "Body Temperature", width: 180 },
     { field: "bodyFat", headerName: "Body Fat", width: 180 },
-    { field: "height", headerName: "Height", width: 180 }
+    { field: "height", headerName: "Height", width: 180 },
+    { field: "respiratoryRate", headerName: "Respiratory Rate", width: 180 },
+    { field: "bloodGlucose", headerName: "Blood Glucose", width: 180 },
+    { field: "oxygenSaturation", headerName: "Oxygen Saturation", width: 180 },
   ];
 
   return (
@@ -72,9 +92,12 @@ const DataDashboardPage: React.FC = () => {
           Current User: {currentUser !== "" ? currentUser : "Not logged in"}
         </Typography>
         <Box sx={{ height: 500, width: "100%" }}>
-          <DataGrid rows={rows} columns={columns} 
-          //@ts-ignore
-          pageSize={10} />
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            //@ts-ignore
+            pageSize={10}
+          />
         </Box>
       </Box>
     </Box>
