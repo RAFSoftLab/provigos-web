@@ -6,6 +6,7 @@ import { useUser } from "../components/UserContext";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { REACT_APP_API_ORIGIN } from "../common/Config";
+import { healthConnectKeys } from "../common/healthConnect";
 
 const DataDashboardPage: React.FC = () => {
   const { token } = useUser();
@@ -18,49 +19,49 @@ const DataDashboardPage: React.FC = () => {
       setCurrentUser(decoded["name"]);
 
       axios
-        .get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {
+        .get(REACT_APP_API_ORIGIN + "/customFieldsKeys", {
           headers: { Authorization: token },
         })
-        .then((response) => {
-          // const values = response.data;
-          // const dates = Object.keys(values.steps);
-          // const formattedRows = dates.map((date, index) => ({
-          //   id: index,
-          //   date,
-          //   steps: values.steps[date] || 0,
-          //   weight: values.weight[date] || 0,
-          //   leanBodyMass: values.leanBodyMass[date] || 0,
-          //   heartRate: values.heartRate[date] || 0,
-          //   caloriesBurned: values.caloriesBurned[date] || 0,
-          //   bloodPressure: values.bloodPressure[date] || 0,
-          //   bodyTemperature: values.bodyTemperature[date] || 0,
-          //   bodyFat: values.bodyFat[date] || 0,
-          //   height: values.height[date] || 0,
-          //   respiratoryRate: values.respiratoryRate[date] || 0,
-          //   bloodGlucose: values.bloodGlucose[date] || 0,
-          //   oxygenSaturation: values.oxygenSaturation[date] || 0,
-          // }));
+        .then((customFieldsKeysResponse) => {
+          const connectionPromises = [
+            axios.get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {
+              headers: { Authorization: token },
+            }),
+            axios.get(REACT_APP_API_ORIGIN + "/customFieldsData", {
+              headers: { Authorization: token },
+            }),
+          ];
 
-          const values = response.data;
-          const dates = Object.keys(values.steps);
-
-          const formattedRows = dates.map((date, index) => {
-            const row = { id: index, date };
-
-            // Loop through each key in the values object to only include existing data
-            Object.keys(values).forEach((key) => {
-              if (values[key][date] !== undefined) {
-                //@ts-ignore
-                row[key] = values[key][date];
-              }
-            });
-
-            return row;
+          Promise.all(connectionPromises).then((responses) => {
+            const [healthConnectResponse, customFieldsDataResponse] = responses;
           });
-          //@ts-ignore
-          setRows(formattedRows);
-        })
-        .catch((error) => console.error(error));
+          axios
+            .get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {
+              headers: { Authorization: token },
+            })
+            .then((response) => {
+              const values = response.data;
+              //TODO Fix this, should not be steps
+              const dates = Object.keys(values.steps);
+
+              const formattedRows = dates.map((date, index) => {
+                const row = { id: index, date };
+
+                // Loop through each key in the values object to only include existing data
+                Object.keys(values).forEach((key) => {
+                  if (values[key][date] !== undefined) {
+                    //@ts-ignore
+                    row[key] = values[key][date];
+                  }
+                });
+
+                return row;
+              });
+              //@ts-ignore
+              setRows(formattedRows);
+            })
+            .catch((error) => console.error(error));
+        });
     }
   }, [token]);
 

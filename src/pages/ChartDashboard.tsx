@@ -52,18 +52,18 @@ type HealthConnectChartDates = {
 const ChartDashboardPage: React.FC = () => {
   const { token, setToken, clearToken } = useUser();
   const [currentUser, setCurrentUser] = useState("");
-  const [stepsChartData, setStepsChartData] = useState([]);
-  const [stepsChartDates, setStepsChartDates] = useState([]);
-  const [weightChartData, setWeightChartData] = useState([]);
-  const [weightChartDates, setWeightChartDates] = useState([]);
-  const [leanBodyMassChartData, setLeanBodyMassChartData] = useState([]);
-  const [leanBodyMassChartDates, setLeanBodyMassChartDates] = useState([]);
-  const [heartRateChartData, setHeartRateChartData] = useState([]);
-  const [heartRateChartDates, setHeartRateChartDates] = useState([]);
-  const [caloriesBurnedRateChartData, setCaloriesBurnedRateChartData] =
-    useState([]);
-  const [caloriesBurnedRateChartDates, setCaloriesBurnedRateChartDates] =
-    useState([]);
+  // const [stepsChartData, setStepsChartData] = useState([]);
+  // const [stepsChartDates, setStepsChartDates] = useState([]);
+  // const [weightChartData, setWeightChartData] = useState([]);
+  // const [weightChartDates, setWeightChartDates] = useState([]);
+  // const [leanBodyMassChartData, setLeanBodyMassChartData] = useState([]);
+  // const [leanBodyMassChartDates, setLeanBodyMassChartDates] = useState([]);
+  // const [heartRateChartData, setHeartRateChartData] = useState([]);
+  // const [heartRateChartDates, setHeartRateChartDates] = useState([]);
+  // const [caloriesBurnedRateChartData, setCaloriesBurnedRateChartData] =
+  //   useState([]);
+  // const [caloriesBurnedRateChartDates, setCaloriesBurnedRateChartDates] =
+  //   useState([]);
 
   const [healthConnectChartData, setHealthConnectChartData] =
     useState<HealthConnectChartData>({});
@@ -78,16 +78,32 @@ const ChartDashboardPage: React.FC = () => {
       setCurrentUser(decoded["name"]);
 
       axios
-        .get(`${REACT_APP_API_ORIGIN}/healthConnectIntegration`, {
+        .get(REACT_APP_API_ORIGIN + "/customFieldsKeys", {
           headers: { Authorization: token },
         })
-        .then(
-          (response) => {
-            //TODO Add loading spinner
-            console.log(response.data);
-            const values = response.data;
+        .then((customFieldsKeysResponse) => {
+          const connectionPromises = [
+            axios.get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {
+              headers: { Authorization: token },
+            }),
+            axios.get(REACT_APP_API_ORIGIN + "/customFieldsData", {
+              headers: { Authorization: token },
+            }),
+          ];
 
-            for (const field of Object.keys(healthConnectKeys)) {
+          Promise.all(connectionPromises).then((responses) => {
+            const [healthConnectResponse, customFieldsDataResponse] = responses;
+
+            const values = {
+              ...healthConnectResponse.data,
+              ...customFieldsDataResponse.data,
+            };
+            console.log(values);
+
+            for (const field of [
+              ...Object.keys(healthConnectKeys),
+              ...customFieldsKeysResponse.data.map((key) => key["name"]),
+            ]) {
               if (values[field]) {
                 console.log(values[field]);
                 const fieldValue = Object.values(values[field]);
@@ -115,7 +131,11 @@ const ChartDashboardPage: React.FC = () => {
                     curve: "smooth",
                   },
                   title: {
-                    text: healthConnectLabels[field],
+                    text:
+                      healthConnectLabels[field] ||
+                      customFieldsKeysResponse.data.find(
+                        (key) => key.name === field
+                      )?.label,
                   },
                 };
 
@@ -127,114 +147,70 @@ const ChartDashboardPage: React.FC = () => {
 
               setIncomingData(values);
             }
+          });
 
-            // //@ts-ignore
-            // setStepsChartData([
-            //   { name: "Steps", data: Object.values(values.steps) },
-            // ]);
-            // //@ts-ignore
-            // setStepsChartDates(Object.keys(values.steps));
+          // axios
+          //   .get(`${REACT_APP_API_ORIGIN}/healthConnectIntegration`, {
+          //     headers: { Authorization: token },
+          //   })
+          //   .then(
+          //     (response) => {
+          //       //TODO Add loading spinner
+          //       console.log(response.data);
+          //       const values = response.data;
+          //       console.log(customFieldsKeysResponse);
 
-            // //@ts-ignore
-            // setWeightChartData([
-            //   { name: "Weight (kg)", data: Object.values(values.weight) },
-            // ]);
-            // //@ts-ignore
-            // setWeightChartDates(Object.keys(values.weight));
+          //       for (const field of [
+          //         ...Object.keys(healthConnectKeys),
+          //         ...customFieldsKeysResponse.data.map((key) => key["name"]),
+          //       ]) {
+          //         if (values[field]) {
+          //           console.log(values[field]);
+          //           const fieldValue = Object.values(values[field]);
+          //           const fieldKeys = Object.keys(values[field]);
+          //           console.log("keys", fieldKeys);
+          //           const tempData = healthConnectChartData;
+          //           tempData[field] = [
+          //             {
+          //               name: healthConnectKeys[field],
+          //               data: fieldValue,
+          //             },
+          //           ];
+          //           setHealthConnectChartData(tempData);
 
-            // //@ts-ignore
-            // setLeanBodyMassChartData([
-            //   {
-            //     name: "Lean Body Mass (kg)",
-            //     data: Object.values(values.leanBodyMass),
-            //   },
-            // ]);
-            // //@ts-ignore
-            // setLeanBodyMassChartDates(Object.keys(values.leanBodyMass));
+          //           console.log(healthConnectChartData);
+          //           const options: ApexOptions = {
+          //             chart: {
+          //               type: "line",
+          //               height: 350,
+          //             },
+          //             xaxis: {
+          //               categories: fieldKeys,
+          //             },
+          //             stroke: {
+          //               curve: "smooth",
+          //             },
+          //             title: {
+          //               text: healthConnectLabels[field],
+          //             },
+          //           };
 
-            // //@ts-ignore
-            // setHeartRateChartData([
-            //   {
-            //     name: "Heart Rate (BPM)",
-            //     data: Object.values(values.heartRate),
-            //   },
-            // ]);
-            // //@ts-ignore
-            // setHeartRateChartDates(Object.keys(values.heartRate));
+          //           const tempOptions = healthConnectChartOptions;
+          //           healthConnectChartOptions[field] = options;
+          //           console.log(healthConnectChartOptions);
+          //           setHealthConnectChartOptions(healthConnectChartOptions);
+          //         }
 
-            // //@ts-ignore
-            // setCaloriesBurnedRateChartData([
-            //   {
-            //     name: "Calories Burned",
-            //     data: Object.values(values.caloriesBurned),
-            //   },
-            // ]);
-            // //@ts-ignore
-            // setCaloriesBurnedRateChartDates(Object.keys(values.caloriesBurned));
-          },
-          (reason) => {
-            console.log(reason);
-          }
-        );
+          //         setIncomingData(values);
+          //       }
+          //     },
+          //     (reason) => {
+          //       console.log(reason);
+          //     }
+          //   );
+        });
     }
   }, [healthConnectChartData, healthConnectChartOptions, token]);
-
-  // Steps data
-  // const stepsChartOptions: ApexOptions = {
-  //   chart: {
-  //     type: "line",
-  //     height: 350,
-  //   },
-  //   xaxis: {
-  //     categories: stepsChartDates,
-  //   },
-  //   stroke: {
-  //     curve: "smooth",
-  //   },
-  //   title: {
-  //     text: "Steps Over Time",
-  //   },
-  // };
-
-  // // Weight data
-  // const weightChartOptions: ApexOptions = {
-  //   chart: { type: "line", height: 350 },
-  //   xaxis: {
-  //     categories: weightChartDates,
-  //   },
-  //   stroke: { curve: "smooth" },
-  //   title: { text: "Weight Over Time" },
-  // };
-
-  // // Lean Body Mass data
-  // const leanBodyMassChartOptions: ApexOptions = {
-  //   chart: { type: "line", height: 350 },
-  //   xaxis: {
-  //     categories: leanBodyMassChartDates,
-  //   },
-  //   stroke: { curve: "smooth" },
-  //   title: { text: "Lean Body Mass Over Time" },
-  // };
-
-  // // Calories Burned data
-  // const caloriesChartOptions: ApexOptions = {
-  //   chart: { type: "line", height: 350 },
-  //   xaxis: {
-  //     categories: caloriesBurnedRateChartDates,
-  //   },
-  //   stroke: { curve: "smooth" },
-  //   title: { text: "Calories Burned Over Time" },
-  // };
-
-  // // Heart Rate data
-  // const heartRateChartOptions: ApexOptions = {
-  //   chart: { type: "line", height: 350 },
-  //   xaxis: {
-  //     categories: heartRateChartDates,
-  //   },
-  //   stroke: { curve: "smooth" },
-  //   title: { text: "Heart Rate Over Time" },
-  // };
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -260,47 +236,6 @@ const ChartDashboardPage: React.FC = () => {
               />
             </div>
           ))}
-
-          {/* <div className="chart-container">
-            <ReactApexChart
-              options={stepsChartOptions}
-              series={healthConnectChartData.steps}
-              type="line"
-              height={350}
-            />
-          </div>
-          <div className="chart-container">
-            <ReactApexChart
-              options={weightChartOptions}
-              series={weightChartData}
-              type="line"
-              height={350}
-            />
-          </div>
-          <div className="chart-container">
-            <ReactApexChart
-              options={leanBodyMassChartOptions}
-              series={leanBodyMassChartData}
-              type="line"
-              height={350}
-            />
-          </div>
-          <div className="chart-container">
-            <ReactApexChart
-              options={caloriesChartOptions}
-              series={caloriesBurnedRateChartData}
-              type="line"
-              height={350}
-            />
-          </div>
-          <div className="chart-container">
-            <ReactApexChart
-              options={heartRateChartOptions}
-              series={heartRateChartData}
-              type="line"
-              height={350}
-            />
-          </div> */}
         </div>
       </Box>
     </Box>
