@@ -14,7 +14,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Build Docker Image
-      run: docker build -t your-docker-image-name .
+      run: docker build -t provigos-web-image .
 
     - name: Log in to DigitalOcean Droplet
       uses: appleboy/ssh-action@v1.0.3
@@ -26,5 +26,5 @@ jobs:
           cd /home/test/provigos-web
           git pull origin main
           docker-compose down
-          docker build -t your-docker-image-name .
-          docker run -d -p 3000:3000 your-docker-image-name
+          docker build -t provigos-web-image .
+          docker run -d -p 3000:3000 provigos-web-image
