@@ -3,28 +3,33 @@ name: Deploy to DigitalOcean
 on:
   push:
     branches:
-      - main  # Change if needed
+      - main  # Change if using a different branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Build Docker Image
-      run: docker build -t provigos-web-image .
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Log in to DigitalOcean Droplet
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.DROPLET_IP }}
-        username: test
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd /home/test/provigos-web
-          git pull origin main
-          docker-compose down
-          docker build -t provigos-web-image .
-          docker run -d -p 3000:3000 provigos-web-image
+      - name: Deploy via SSH
+        run: |
+          ssh -o StrictHostKeyChecking=no test@${{ secrets.DROPLET_IP }} << 'EOF'
+            cd /home/test/provigos-web  # Adjust this to your app directory
+            
+            # Pull latest code
+            git pull origin main
+            
+            # Rebuild and restart services
+            docker-compose down
+            docker-compose up -d --build
+
+            # Clean up old images
+            docker system prune -af
+          EOF
