@@ -6,12 +6,31 @@ import { useUser } from "../components/UserContext";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { REACT_APP_API_ORIGIN } from "../common/Config";
-import { healthConnectKeys } from "../common/healthConnect";
+
+const COLUMN_WIDTH = 140
+
+const healthConnectColumns = [
+  { field: "date", headerName: "Date", width: COLUMN_WIDTH },
+  { field: "steps", headerName: "Steps", width: COLUMN_WIDTH },
+  { field: "weight", headerName: "Weight (kg)", width: COLUMN_WIDTH },
+  { field: "leanBodyMass", headerName: "Lean Body Mass (kg)", width: COLUMN_WIDTH },
+  { field: "heartRate", headerName: "Heart Rate (BPM)", width: COLUMN_WIDTH },
+  { field: "caloriesBurned", headerName: "Calories Burned", width: COLUMN_WIDTH },
+  { field: "bloodPressure", headerName: "Blood Pressure", width: COLUMN_WIDTH },
+  { field: "bodyTemperature", headerName: "Body Temperature", width: COLUMN_WIDTH },
+  { field: "bodyFat", headerName: "Body Fat", width: COLUMN_WIDTH },
+  { field: "height", headerName: "Height", width: COLUMN_WIDTH },
+  { field: "respiratoryRate", headerName: "Respiratory Rate", width: COLUMN_WIDTH },
+  { field: "bloodGlucose", headerName: "Blood Glucose", width: COLUMN_WIDTH },
+  { field: "oxygenSaturation", headerName: "Oxygen Saturation", width: COLUMN_WIDTH },
+];
 
 const DataDashboardPage: React.FC = () => {
   const { token } = useUser();
   const [currentUser, setCurrentUser] = useState("");
   const [rows, setRows] = useState([]);
+  const [columns, setColumns] = useState([]);
+
 
   useEffect(() => {
     if (token) {
@@ -23,6 +42,18 @@ const DataDashboardPage: React.FC = () => {
           headers: { Authorization: token },
         })
         .then((customFieldsKeysResponse) => {
+
+          setColumns([
+            ...healthConnectColumns,
+            ...customFieldsKeysResponse.data.customFields?.map((customField) => {
+              return {
+                field: customField.name,
+                headerName: customField.label,
+                width: COLUMN_WIDTH,
+              }
+            })
+          ])
+
           const connectionPromises = [
             axios.get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {
               headers: { Authorization: token },
@@ -34,52 +65,32 @@ const DataDashboardPage: React.FC = () => {
 
           Promise.all(connectionPromises).then((responses) => {
             const [healthConnectResponse, customFieldsDataResponse] = responses;
-          });
-          axios
-            .get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {
-              headers: { Authorization: token },
-            })
-            .then((response) => {
-              const values = response.data;
-              //TODO Fix this, should not be steps
-              const dates = Object.keys(values.steps);
+            const values = { ...healthConnectResponse.data, ...customFieldsDataResponse.data };
 
-              const formattedRows = dates.map((date, index) => {
-                const row = { id: index, date };
+            const allDates = Array.from(new Set(Object.values(values).map((i) => Object.keys(i)).flat()))
 
-                // Loop through each key in the values object to only include existing data
-                Object.keys(values).forEach((key) => {
-                  if (values[key][date] !== undefined) {
-                    //@ts-ignore
-                    row[key] = values[key][date];
-                  }
-                });
 
-                return row;
+            const formattedRows = allDates.map((date, index) => {
+              const row = { id: index, date };
+
+              // Loop through each key in the values object to only include existing data
+              Object.keys(values).forEach((key) => {
+                if (values[key][date] !== undefined) {
+                  //@ts-ignore
+                  row[key] = values[key][date];
+                }
               });
-              //@ts-ignore
-              setRows(formattedRows);
-            })
-            .catch((error) => console.error(error));
+
+              return row;
+            });
+            //@ts-ignore
+            setRows(formattedRows);
+            // })
+            //.catch((error) => console.error(error));
+          });
         });
     }
   }, [token]);
-
-  const columns = [
-    { field: "date", headerName: "Date", width: 150 },
-    { field: "steps", headerName: "Steps", width: 150 },
-    { field: "weight", headerName: "Weight (kg)", width: 150 },
-    { field: "leanBodyMass", headerName: "Lean Body Mass (kg)", width: 180 },
-    { field: "heartRate", headerName: "Heart Rate (BPM)", width: 180 },
-    { field: "caloriesBurned", headerName: "Calories Burned", width: 180 },
-    { field: "bloodPressure", headerName: "Blood Pressure", width: 180 },
-    { field: "bodyTemperature", headerName: "Body Temperature", width: 180 },
-    { field: "bodyFat", headerName: "Body Fat", width: 180 },
-    { field: "height", headerName: "Height", width: 180 },
-    { field: "respiratoryRate", headerName: "Respiratory Rate", width: 180 },
-    { field: "bloodGlucose", headerName: "Blood Glucose", width: 180 },
-    { field: "oxygenSaturation", headerName: "Oxygen Saturation", width: 180 },
-  ];
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -92,7 +103,7 @@ const DataDashboardPage: React.FC = () => {
         <Typography variant="subtitle1">
           Current User: {currentUser !== "" ? currentUser : "Not logged in"}
         </Typography>
-        <Box sx={{ height: 500, width: "100%" }}>
+        <Box sx={{ height: 900, width: 2000 }}>
           <DataGrid
             rows={rows}
             columns={columns}
