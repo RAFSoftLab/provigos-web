@@ -102,7 +102,7 @@ const ChartDashboardPage: React.FC = () => {
 
             for (const field of [
               ...Object.keys(healthConnectKeys),
-              ...customFieldsKeysResponse.data.map((key) => key["name"]),
+              ...customFieldsKeysResponse.data.customFields?.map((key) => key["name"]),
             ]) {
               if (values[field]) {
                 console.log(values[field]);
@@ -133,7 +133,7 @@ const ChartDashboardPage: React.FC = () => {
                   title: {
                     text:
                       healthConnectLabels[field] ||
-                      customFieldsKeysResponse.data.find(
+                      customFieldsKeysResponse.data.customFields?.find(
                         (key) => key.name === field
                       )?.label,
                   },
@@ -145,6 +145,7 @@ const ChartDashboardPage: React.FC = () => {
                 setHealthConnectChartOptions(healthConnectChartOptions);
               }
 
+              console.log("INCOMING DATA", values)
               setIncomingData(values);
             }
           });
@@ -226,16 +227,19 @@ const ChartDashboardPage: React.FC = () => {
         Current User: {currentUser !== "" ? currentUser : "Not logged in"}
         {/* Grid container for charts */}
         <div className="dashboard-container">
-          {Object.keys(incomingData).map((fieldKey) => (
-            <div className="chart-container" key={fieldKey}>
-              <ReactApexChart
-                options={healthConnectChartOptions[fieldKey]}
-                series={healthConnectChartData[fieldKey]}
-                type="line"
-                height={350}
-              />
-            </div>
-          ))}
+          {Object.keys(incomingData).map((fieldKey) => {
+            if (healthConnectChartOptions[fieldKey] && healthConnectChartData[fieldKey]) {
+              return (<div className="chart-container" key={fieldKey}>
+                <ReactApexChart
+                  options={healthConnectChartOptions[fieldKey]}
+                  series={healthConnectChartData[fieldKey]}
+                  type="line"
+                  height={350}
+                />
+              </div>)
+            }
+          }
+          )}
         </div>
       </Box>
     </Box>
