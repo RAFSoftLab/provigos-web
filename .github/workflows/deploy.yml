@@ -3,29 +3,25 @@ name: Deploy to DigitalOcean
 on:
   push:
     branches:
-      - main  # Change if needed
+      - main # Change if needed
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    - name: Build Docker Image
-      run: docker build -t provigos-web-image .
-
-    - name: Log in to DigitalOcean Droplet
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.DROPLET_IP }}
-        username: test
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd /home/test/provigos-web
-          git pull origin main
-          docker-compose down
-          docker build -t provigos-web-image .
-          docker run -d -p 3000:3000 --env-file .env provigos-web-image
-          
+      - name: Log in to DigitalOcean Droplet
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: test
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/test/provigos-web
+            git pull origin main
+            docker-compose down
+            docker build -t provigos-web-image .
+            docker run -d -p 3000:3000 --env-file .env provigos-web-image
