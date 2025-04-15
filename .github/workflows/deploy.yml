@@ -1,4 +1,4 @@
-name: Deploy to DigitalOcean (Kubernetes)
+name: Deploy to DigitalOcean with Kubernetes
 
 on:
   push:
@@ -10,36 +10,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker Image
-        run: docker build -t provigos-web-image:latest .
+      - name: Set up SSH key and known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.DROPLET_IP }} >> ~/.ssh/known_hosts
 
-      - name: Save Docker Image to Tarball
-        run: docker save provigos-web-image:latest -o provigos-web-image.tar
-
-      - name: Upload Docker Image to Droplet using rsync
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DROPLET_IP }}
-          username: test
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            rsync -avz -e "ssh -i ${{ secrets.SSH_PRIVATE_KEY }}" provigos-web-image.tar test@${{ secrets.DROPLET_IP }}:/home/test/
-
-      - name: SSH to Droplet and Deploy to k3s
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.DROPLET_IP }}
-          username: test
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
+      - name: Deploy on Droplet
+        run: |
+          ssh -i ~/.ssh/id_rsa test@${{ secrets.DROPLET_IP }} << 'EOF'
             cd /home/test/provigos-web
+
+            echo "➡️ Pulling latest code..."
             git pull origin main
 
-            # Import image into k3s containerd
-            sudo ctr -n k8s.io images import /home/test/provigos-web-image.tar
+            echo "🐳 Building Docker image..."
+            docker build -t provigos-web-image .
 
-            # Apply the Kubernetes manifest (adjust filename if needed)
+            echo "📦 Saving and loading into containerd..."
+            docker save provigos-web-image | sudo ctr -n k8s.io images import -
+
+            echo "🚀 Applying Kubernetes manifests..."
             kubectl apply -f k8s/k8s-deployment.yaml
+          EOF
