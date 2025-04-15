@@ -19,14 +19,14 @@ jobs:
       - name: Save Docker Image to Tarball
         run: docker save provigos-web-image:latest -o provigos-web-image.tar
 
-      - name: Upload Docker Image to Droplet
-        uses: appleboy/scp-action@v0.1.4
+      - name: Upload Docker Image to Droplet using rsync
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DROPLET_IP }}
           username: test
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "provigos-web-image.tar"
-          target: "/home/test/"
+          script: |
+            rsync -avz -e "ssh -i ${{ secrets.SSH_PRIVATE_KEY }}" provigos-web-image.tar test@${{ secrets.DROPLET_IP }}:/home/test/
 
       - name: SSH to Droplet and Deploy to k3s
         uses: appleboy/ssh-action@v1.0.3
