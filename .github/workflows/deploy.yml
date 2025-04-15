@@ -1,9 +1,9 @@
-name: Deploy to DigitalOcean
+name: Deploy to DigitalOcean (Kubernetes)
 
 on:
   push:
     branches:
-      - main # Change if needed
+      - main
 
 jobs:
   deploy:
@@ -13,7 +13,22 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Log in to DigitalOcean Droplet
+      - name: Build Docker Image
+        run: docker build -t provigos-web-image:latest .
+
+      - name: Save Docker Image to Tarball
+        run: docker save provigos-web-image:latest -o provigos-web-image.tar
+
+      - name: Upload Docker Image to Droplet
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: test
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "provigos-web-image.tar"
+          target: "/home/test/"
+
+      - name: SSH to Droplet and Deploy to k3s
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DROPLET_IP }}
@@ -22,6 +37,9 @@ jobs:
           script: |
             cd /home/test/provigos-web
             git pull origin main
-            docker-compose down
-            docker build -t provigos-web-image .
-            docker run -d -p 3000:3000 --env-file .env provigos-web-image
+
+            # Import image into k3s containerd
+            sudo ctr -n k8s.io images import /home/test/provigos-web-image.tar
+
+            # Apply the Kubernetes manifest (adjust filename if needed)
+            kubectl apply -f k8s/k8s-deployment.yaml
