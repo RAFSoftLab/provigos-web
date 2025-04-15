@@ -34,6 +34,7 @@ jobs:
             echo "📦 Saving and loading into containerd..."
             docker save provigos-web-image | sudo ctr -n k8s.io images import -
 
-            echo "🚀 Applying Kubernetes manifests..."
+            echo "🚀 Reapplying Kubernetes deployment..."
+            export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
             kubectl apply -f k8s/k8s-deployment.yaml
           EOF
