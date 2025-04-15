@@ -23,6 +23,14 @@ jobs:
       - name: Deploy on Droplet
         run: |
           ssh -i ~/.ssh/id_rsa test@${{ secrets.DROPLET_IP }} << 'EOF'
+            set -e
+
+            echo "📁 Freeing up space..."
+            docker container prune -f || true
+            docker image prune -a -f || true
+            docker volume prune -f || true
+            sudo journalctl --vacuum-time=1d || true
+
             cd /home/test/provigos-web
 
             echo "➡️ Pulling latest code..."
