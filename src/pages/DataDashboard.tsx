@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Box, CssBaseline, Typography } from "@mui/material";
+import { Box, CircularProgress, CssBaseline, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import Sidebar from "../components/Sidebar";
 import { useUser } from "../components/UserContext";
@@ -30,12 +30,12 @@ const DataDashboardPage: React.FC = () => {
   const [currentUser, setCurrentUser] = useState("");
   const [rows, setRows] = useState([]);
   const [columns, setColumns] = useState([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
   useEffect(() => {
     if (token) {
-      const decoded = jwtDecode(token) as any;
-      setCurrentUser(decoded["name"]);
+      setIsLoading(true);
 
       axios
         .get(REACT_APP_API_ORIGIN + "/customFieldsKeys", {
@@ -87,8 +87,15 @@ const DataDashboardPage: React.FC = () => {
             setRows(formattedRows);
             // })
             //.catch((error) => console.error(error));
+          }).catch((reject) => {
+            console.log(reject);
+            setIsLoading(false);
           });
+        }).catch((reject) => {
+          console.log(reject);
+          setIsLoading(false);
         });
+      setIsLoading(false);
     }
   }, [token]);
 
@@ -100,16 +107,24 @@ const DataDashboardPage: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           PROVIGOS Health Metrics Dashboard
         </Typography>
-        <Typography variant="subtitle1">
-          Current User: {currentUser !== "" ? currentUser : "Not logged in"}
-        </Typography>
         <Box sx={{ height: 900, width: 2000 }}>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            //@ts-ignore
-            pageSize={10}
-          />
+          {isLoading ? <Box
+            sx={{
+              height: "80vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <CircularProgress size={100} />
+          </Box> :
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              //@ts-ignore
+              pageSize={10}
+            />
+          }
         </Box>
       </Box>
     </Box>

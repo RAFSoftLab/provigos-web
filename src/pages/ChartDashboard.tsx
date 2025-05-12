@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useEffect, useState } from "react";
-import { Box, CssBaseline, Typography } from "@mui/material";
+import { Box, CssBaseline, Typography, CircularProgress } from "@mui/material";
 import ReactApexChart from "react-apexcharts";
 import { ApexOptions } from "apexcharts";
 import "./ChartDashboard.css";
@@ -13,6 +13,7 @@ import {
   healthConnectKeys,
   healthConnectLabels,
 } from "../common/healthConnect";
+import { rejects } from "assert";
 
 type ChartData = {
   name: string;
@@ -52,31 +53,20 @@ type HealthConnectChartDates = {
 const ChartDashboardPage: React.FC = () => {
   const { token, setToken, clearToken } = useUser();
   const [currentUser, setCurrentUser] = useState("");
-  // const [stepsChartData, setStepsChartData] = useState([]);
-  // const [stepsChartDates, setStepsChartDates] = useState([]);
-  // const [weightChartData, setWeightChartData] = useState([]);
-  // const [weightChartDates, setWeightChartDates] = useState([]);
-  // const [leanBodyMassChartData, setLeanBodyMassChartData] = useState([]);
-  // const [leanBodyMassChartDates, setLeanBodyMassChartDates] = useState([]);
-  // const [heartRateChartData, setHeartRateChartData] = useState([]);
-  // const [heartRateChartDates, setHeartRateChartDates] = useState([]);
-  // const [caloriesBurnedRateChartData, setCaloriesBurnedRateChartData] =
-  //   useState([]);
-  // const [caloriesBurnedRateChartDates, setCaloriesBurnedRateChartDates] =
-  //   useState([]);
-
   const [healthConnectChartData, setHealthConnectChartData] =
     useState<HealthConnectChartData>({});
   const [healthConnectChartOptions, setHealthConnectChartOptions] = useState(
     {}
   );
   const [incomingData, setIncomingData] = useState({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (token) {
-      const decoded = jwtDecode(token) as any;
-      setCurrentUser(decoded["name"]);
+      // const decoded = jwtDecode(token) as any;
+      // setCurrentUser(decoded["name"]);
 
+      setIsLoading(true);
       axios
         .get(REACT_APP_API_ORIGIN + "/customFieldsKeys", {
           headers: { Authorization: token },
@@ -145,70 +135,16 @@ const ChartDashboardPage: React.FC = () => {
                 setHealthConnectChartOptions(healthConnectChartOptions);
               }
 
-              console.log("INCOMING DATA", values)
               setIncomingData(values);
+              setIsLoading(false);
             }
+          }, [currentUser]).catch((reject) => {
+            console.log(reject);
+            setIsLoading(false);
           });
-
-          // axios
-          //   .get(`${REACT_APP_API_ORIGIN}/healthConnectIntegration`, {
-          //     headers: { Authorization: token },
-          //   })
-          //   .then(
-          //     (response) => {
-          //       //TODO Add loading spinner
-          //       console.log(response.data);
-          //       const values = response.data;
-          //       console.log(customFieldsKeysResponse);
-
-          //       for (const field of [
-          //         ...Object.keys(healthConnectKeys),
-          //         ...customFieldsKeysResponse.data.map((key) => key["name"]),
-          //       ]) {
-          //         if (values[field]) {
-          //           console.log(values[field]);
-          //           const fieldValue = Object.values(values[field]);
-          //           const fieldKeys = Object.keys(values[field]);
-          //           console.log("keys", fieldKeys);
-          //           const tempData = healthConnectChartData;
-          //           tempData[field] = [
-          //             {
-          //               name: healthConnectKeys[field],
-          //               data: fieldValue,
-          //             },
-          //           ];
-          //           setHealthConnectChartData(tempData);
-
-          //           console.log(healthConnectChartData);
-          //           const options: ApexOptions = {
-          //             chart: {
-          //               type: "line",
-          //               height: 350,
-          //             },
-          //             xaxis: {
-          //               categories: fieldKeys,
-          //             },
-          //             stroke: {
-          //               curve: "smooth",
-          //             },
-          //             title: {
-          //               text: healthConnectLabels[field],
-          //             },
-          //           };
-
-          //           const tempOptions = healthConnectChartOptions;
-          //           healthConnectChartOptions[field] = options;
-          //           console.log(healthConnectChartOptions);
-          //           setHealthConnectChartOptions(healthConnectChartOptions);
-          //         }
-
-          //         setIncomingData(values);
-          //       }
-          //     },
-          //     (reason) => {
-          //       console.log(reason);
-          //     }
-          //   );
+        }).catch((reject) => {
+          console.log(reject);
+          setIsLoading(false);
         });
     }
   }, [healthConnectChartData, healthConnectChartOptions, token]);
@@ -224,22 +160,35 @@ const ChartDashboardPage: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           PROVIGOS Health Metrics Dashboard
         </Typography>
-        Current User: {currentUser !== "" ? currentUser : "Not logged in"}
+        {/* Current User: {currentUser !== "" ? currentUser : "Not logged in"} */}
         {/* Grid container for charts */}
+
         <div className="dashboard-container">
-          {Object.keys(incomingData).map((fieldKey) => {
-            if (healthConnectChartOptions[fieldKey] && healthConnectChartData[fieldKey]) {
-              return (<div className="chart-container" key={fieldKey}>
-                <ReactApexChart
-                  options={healthConnectChartOptions[fieldKey]}
-                  series={healthConnectChartData[fieldKey]}
-                  type="line"
-                  height={350}
-                />
-              </div>)
+          {isLoading ? <Box
+            sx={{
+              height: "80vh",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}
+          >
+            <CircularProgress size={100} />
+          </Box> :
+
+            Object.keys(incomingData).map((fieldKey) => {
+              if (healthConnectChartOptions[fieldKey] && healthConnectChartData[fieldKey]) {
+                return (<div className="chart-container" key={fieldKey}>
+                  <ReactApexChart
+                    options={healthConnectChartOptions[fieldKey]}
+                    series={healthConnectChartData[fieldKey]}
+                    type="line"
+                    height={350}
+                  />
+                </div>)
+              }
             }
+            )
           }
-          )}
         </div>
       </Box>
     </Box>
