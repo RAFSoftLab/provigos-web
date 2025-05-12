@@ -85,6 +85,14 @@ const Sidebar: React.FC = () => {
         >
           <ListItemText primary="Chart Dashboard" />
         </ListItemButton>
+
+        <ListItemButton
+          onClick={() => {
+            navigate("/customFields");
+          }}
+        >
+          <ListItemText primary="Custom Fields" />
+        </ListItemButton>
       </List>
     </Drawer>
   );

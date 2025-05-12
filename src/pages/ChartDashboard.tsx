@@ -81,6 +81,7 @@ const ChartDashboardPage: React.FC = () => {
             }),
           ];
 
+          console.log("CUSTGOMI", customFieldsKeysResponse);
           Promise.all(connectionPromises).then((responses) => {
             const [healthConnectResponse, customFieldsDataResponse] = responses;
 
