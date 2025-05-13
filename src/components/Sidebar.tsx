@@ -1,14 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, Box, Button, Drawer, List, ListItemButton, ListItemText, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 import { GoogleLogin } from "@react-oauth/google";
 import { useUser } from "./UserContext";
 import { jwtDecode } from "jwt-decode";
 
-const drawerWidth = 240;
+export const drawerWidth = 240;
 // const navigate = useNavigate();
-
-
 
 const Sidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -44,7 +51,6 @@ const Sidebar: React.FC = () => {
       }}
     >
       <div>
-
         <Box sx={{ p: 2, textAlign: "center" }}>
           {!googleUser ? (
             <GoogleLogin
@@ -53,7 +59,10 @@ const Sidebar: React.FC = () => {
             />
           ) : (
             <Box>
-              <Avatar src={googleUser.picture} sx={{ width: 56, height: 56, mx: "auto", mb: 1 }} />
+              <Avatar
+                src={googleUser.picture}
+                sx={{ width: 56, height: 56, mx: "auto", mb: 1 }}
+              />
               <Typography variant="subtitle1">{googleUser.name}</Typography>
               <Typography variant="body2" color="textSecondary">
                 {googleUser.email}
@@ -98,4 +107,4 @@ const Sidebar: React.FC = () => {
   );
 };
 
-export default Sidebar
+export default Sidebar;
