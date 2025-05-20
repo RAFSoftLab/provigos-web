@@ -30,14 +30,20 @@ const FabMenu = ({ customFields = [] }) => {
 
   const handleSubmit = () => {
     console.log("Submitted values:", values);
+    if (!date) {
+      return "Wrong date";
+    }
     const formatedVaules = Object.entries(values).reduce(
       (acc, [key, value]) => {
-        return {
-          ...acc,
-          [key]: {
-            [date]: value,
-          },
-        };
+        if (value) {
+          return {
+            ...acc,
+            [key]: {
+              [date]: value,
+            },
+          };
+        }
+        return acc;
       },
       {}
     );
