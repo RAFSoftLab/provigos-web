@@ -14,6 +14,7 @@ import {
   healthConnectLabels,
 } from "../common/healthConnect";
 import { rejects } from "assert";
+import FabMenu from "../components/FabMenu";
 
 type ChartData = {
   name: string;
@@ -60,6 +61,7 @@ const ChartDashboardPage: React.FC = () => {
   );
   const [incomingData, setIncomingData] = useState({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [customFieldsKeys, setCustomFieldsKeys] = useState<CustomField[]>([]);
 
   useEffect(() => {
     if (token) {
@@ -72,6 +74,7 @@ const ChartDashboardPage: React.FC = () => {
           headers: { Authorization: token },
         })
         .then((customFieldsKeysResponse) => {
+          setCustomFieldsKeys(customFieldsKeysResponse.data.customFields);
           const connectionPromises = [
             axios.get(REACT_APP_API_ORIGIN + "/healthConnectIntegration", {
               headers: { Authorization: token },
@@ -82,68 +85,77 @@ const ChartDashboardPage: React.FC = () => {
           ];
 
           console.log("CUSTGOMI", customFieldsKeysResponse);
-          Promise.all(connectionPromises).then((responses) => {
-            const [healthConnectResponse, customFieldsDataResponse] = responses;
+          Promise.all(connectionPromises)
+            .then(
+              (responses) => {
+                const [healthConnectResponse, customFieldsDataResponse] =
+                  responses;
 
-            const values = {
-              ...healthConnectResponse.data,
-              ...customFieldsDataResponse.data,
-            };
-            console.log(values);
-
-            for (const field of [
-              ...Object.keys(healthConnectKeys),
-              ...customFieldsKeysResponse.data.customFields?.map((key) => key["name"]),
-            ]) {
-              if (values[field]) {
-                console.log(values[field]);
-                const fieldValue = Object.values(values[field]);
-                const fieldKeys = Object.keys(values[field]);
-                console.log("keys", fieldKeys);
-                const tempData = healthConnectChartData;
-                tempData[field] = [
-                  {
-                    name: healthConnectKeys[field],
-                    data: fieldValue,
-                  },
-                ];
-                setHealthConnectChartData(tempData);
-
-                console.log(healthConnectChartData);
-                const options: ApexOptions = {
-                  chart: {
-                    type: "line",
-                    height: 350,
-                  },
-                  xaxis: {
-                    categories: fieldKeys,
-                  },
-                  stroke: {
-                    curve: "smooth",
-                  },
-                  title: {
-                    text:
-                      healthConnectLabels[field] ||
-                      customFieldsKeysResponse.data.customFields?.find(
-                        (key) => key.name === field
-                      )?.label,
-                  },
+                const values = {
+                  ...healthConnectResponse.data,
+                  ...customFieldsDataResponse.data,
                 };
+                console.log(values);
 
-                const tempOptions = healthConnectChartOptions;
-                healthConnectChartOptions[field] = options;
-                console.log(healthConnectChartOptions);
-                setHealthConnectChartOptions(healthConnectChartOptions);
-              }
+                for (const field of [
+                  ...Object.keys(healthConnectKeys),
+                  ...customFieldsKeysResponse.data.customFields?.map(
+                    (key) => key["name"]
+                  ),
+                ]) {
+                  if (values[field]) {
+                    console.log(values[field]);
+                    const fieldValue = Object.values(values[field]);
+                    const fieldKeys = Object.keys(values[field]);
+                    console.log("keys", fieldKeys);
+                    const tempData = healthConnectChartData;
+                    tempData[field] = [
+                      {
+                        name: healthConnectKeys[field],
+                        data: fieldValue,
+                      },
+                    ];
+                    setHealthConnectChartData(tempData);
 
-              setIncomingData(values);
+                    console.log(healthConnectChartData);
+                    const options: ApexOptions = {
+                      chart: {
+                        type: "line",
+                        height: 350,
+                      },
+                      xaxis: {
+                        categories: fieldKeys,
+                      },
+                      stroke: {
+                        curve: "smooth",
+                      },
+                      title: {
+                        text:
+                          healthConnectLabels[field] ||
+                          customFieldsKeysResponse.data.customFields?.find(
+                            (key) => key.name === field
+                          )?.label,
+                      },
+                    };
+
+                    const tempOptions = healthConnectChartOptions;
+                    healthConnectChartOptions[field] = options;
+                    console.log(healthConnectChartOptions);
+                    setHealthConnectChartOptions(healthConnectChartOptions);
+                  }
+
+                  setIncomingData(values);
+                  setIsLoading(false);
+                }
+              },
+              [currentUser]
+            )
+            .catch((reject) => {
+              console.log(reject);
               setIsLoading(false);
-            }
-          }, [currentUser]).catch((reject) => {
-            console.log(reject);
-            setIsLoading(false);
-          });
-        }).catch((reject) => {
+            });
+        })
+        .catch((reject) => {
           console.log(reject);
           setIsLoading(false);
         });
@@ -154,44 +166,49 @@ const ChartDashboardPage: React.FC = () => {
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
       {/* Sidebar */}
-
       <Sidebar />
       {/* Main Content */}
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          PROVIGOS Health Metrics Dashboard
+          PROVIGOS - Dashboard
         </Typography>
         {/* Current User: {currentUser !== "" ? currentUser : "Not logged in"} */}
         {/* Grid container for charts */}
 
         <div className="dashboard-container">
-          {isLoading ? <Box
-            sx={{
-              height: "80vh",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <CircularProgress size={100} />
-          </Box> :
-
+          {isLoading ? (
+            <Box
+              sx={{
+                height: "80vh",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <CircularProgress size={100} />
+            </Box>
+          ) : (
             Object.keys(incomingData).map((fieldKey) => {
-              if (healthConnectChartOptions[fieldKey] && healthConnectChartData[fieldKey]) {
-                return (<div className="chart-container" key={fieldKey}>
-                  <ReactApexChart
-                    options={healthConnectChartOptions[fieldKey]}
-                    series={healthConnectChartData[fieldKey]}
-                    type="line"
-                    height={350}
-                  />
-                </div>)
+              if (
+                healthConnectChartOptions[fieldKey] &&
+                healthConnectChartData[fieldKey]
+              ) {
+                return (
+                  <div className="chart-container" key={fieldKey}>
+                    <ReactApexChart
+                      options={healthConnectChartOptions[fieldKey]}
+                      series={healthConnectChartData[fieldKey]}
+                      type="line"
+                      height={350}
+                    />
+                  </div>
+                );
               }
-            }
-            )
-          }
+            })
+          )}
         </div>
       </Box>
+      {isLoading || <FabMenu customFields={customFieldsKeys} />}
     </Box>
   );
 };

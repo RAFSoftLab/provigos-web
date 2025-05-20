@@ -6,6 +6,8 @@ import { useUser } from "../components/UserContext";
 import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { REACT_APP_API_ORIGIN } from "../common/Config";
+import FabMenu from "../components/FabMenu";
+import { CustomField } from "../common/healthConnect";
 
 const COLUMN_WIDTH = 140;
 
@@ -51,6 +53,7 @@ const DataDashboardPage: React.FC = () => {
   const [rows, setRows] = useState([]);
   const [columns, setColumns] = useState([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [customFieldsKeys, setCustomFieldsKeys] = useState<CustomField[]>([]);
 
   useEffect(() => {
     if (token) {
@@ -60,6 +63,7 @@ const DataDashboardPage: React.FC = () => {
           headers: { Authorization: token },
         })
         .then((customFieldsKeysResponse) => {
+          setCustomFieldsKeys(customFieldsKeysResponse.data.customFields);
           setColumns([
             ...healthConnectColumns,
             ...customFieldsKeysResponse.data.customFields?.map(
@@ -136,7 +140,7 @@ const DataDashboardPage: React.FC = () => {
       <Sidebar />
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Typography variant="h4" gutterBottom>
-          PROVIGOS Health Metrics Dashboard
+          PROVIGOS - Dashboard
         </Typography>
         {isLoading ? (
           <Box>
@@ -160,6 +164,7 @@ const DataDashboardPage: React.FC = () => {
           />
         )}
       </Box>
+      {isLoading || <FabMenu customFields={customFieldsKeys} />}
     </Box>
   );
 };

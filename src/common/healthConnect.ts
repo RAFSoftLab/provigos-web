@@ -27,3 +27,9 @@ export const healthConnectLabels = {
   bloodGlucose: "Blood Glucose",
   oxygenSaturation: "Oxygen Saturation",
 };
+
+export type CustomField = {
+  name: string;
+  label: string;
+  unit: string;
+};
