@@ -11,6 +11,12 @@ export const healthConnectKeys = {
   respiratoryRate: "respiratoryRate",
   bloodGlucose: "bloodGlucose",
   oxygenSaturation: "oxygenSaturation",
+  githubTotal: "githubTotal",
+  githubDaily: "githubDaily",
+  //spotifyGenre: "spotifyGenre",
+  spotifyPopularity: "spotifyPopularity",
+  screenTime: "screenTime",
+  unlockAttempts: "unlockAttempts",
 };
 
 export const healthConnectLabels = {
@@ -26,6 +32,12 @@ export const healthConnectLabels = {
   respiratoryRate: "Respiratory Rate",
   bloodGlucose: "Blood Glucose",
   oxygenSaturation: "Oxygen Saturation",
+  githubTotal: "Total Commits",
+  githubDaily: "Daily Commits",
+  //spotifyGenre: "Most Listened Genre",
+  spotifyPopularity: "Average Artist Popularity",
+  screenTime: "Screen Time",
+  unlockAttempts: "Unlock Attempts",
 };
 
 export type CustomField = {

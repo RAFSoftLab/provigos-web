@@ -34,6 +34,12 @@ type HealthConnectChartData = {
   respiratoryRate?: ChartData[];
   bloodGlucose?: ChartData[];
   oxygenSaturation?: ChartData[];
+  githubTotal?: ChartData[];
+  githubDaily?: ChartData[];
+  spotifyGenre?: ChartData[];
+  spotifyPopularity?: ChartData[];
+  screenTime?: ChartData[];
+  unlockAttempts?: ChartData[];
 };
 
 type HealthConnectChartDates = {
@@ -49,6 +55,12 @@ type HealthConnectChartDates = {
   respiratoryRate?: string[];
   bloodGlucose?: string[];
   oxygenSaturation?: string[];
+  githubTotal?: string[];
+  githubDaily?: string[];
+  spotifyGenre?: string[];
+  spotifyPopularity?: string[];
+  screenTime?: string[];
+  unlockAttempts?: string[];
 };
 
 const ChartDashboardPage: React.FC = () => {
@@ -83,8 +95,6 @@ const ChartDashboardPage: React.FC = () => {
               headers: { Authorization: token },
             }),
           ];
-
-          console.log("CUSTGOMI", customFieldsKeysResponse);
           Promise.all(connectionPromises)
             .then(
               (responses) => {
@@ -95,7 +105,7 @@ const ChartDashboardPage: React.FC = () => {
                   ...healthConnectResponse.data,
                   ...customFieldsDataResponse.data,
                 };
-                console.log(values);
+                console.log("VALUES ALL", values);
 
                 for (const field of [
                   ...Object.keys(healthConnectKeys),
@@ -140,7 +150,7 @@ const ChartDashboardPage: React.FC = () => {
 
                     const tempOptions = healthConnectChartOptions;
                     healthConnectChartOptions[field] = options;
-                    console.log(healthConnectChartOptions);
+                    //console.log(healthConnectChartOptions);
                     setHealthConnectChartOptions(healthConnectChartOptions);
                   }
 

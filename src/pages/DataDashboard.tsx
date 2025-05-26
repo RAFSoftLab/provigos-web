@@ -45,6 +45,34 @@ const healthConnectColumns = [
     headerName: "Oxygen Saturation",
     width: COLUMN_WIDTH,
   },
+  {
+    field: "githubTotal",
+    headerName: "Total Commits",
+    width: COLUMN_WIDTH,
+  },
+  {
+    field: "githubDaily",
+    headerName: "Daily Commits",
+    width: COLUMN_WIDTH,
+  },
+  {
+    field: "spotifyGenre",
+    headerName: "Most Listened Genre",
+    width: COLUMN_WIDTH,
+  },
+  {
+    field: "spotifyPopularity",
+    headerName: "Average Artist Popularity",
+    width: COLUMN_WIDTH,
+  }, {
+    field: "screenTime",
+    headerName: "Screen Time",
+    width: COLUMN_WIDTH,
+  }, {
+    field: "unlockAttempts",
+    headerName: "Unlock Attempts",
+    width: COLUMN_WIDTH,
+  },
 ];
 
 const DataDashboardPage: React.FC = () => {
